@@ -1,6 +1,12 @@
 # hnbs
 Holanet network binary structure
 
+Format for sending quickly parsable structured data over the network. Somewhat
+similar to the NBT format, except far more minimal, and with a greater
+structural similarity to that of JSON. All data is encoded as big-endian.
+
+## Tag Types
+
 | Hex | Code | Meaning                            | 
 | :-: | :--: | :------                            |
 | x00 | 0    | null                               |
@@ -20,18 +26,18 @@ Holanet network binary structure
 | x86 | 134  | unsigned 64 bit integer            |
 | x87 | 135  | signed 64 bit integer              |
 |     |      |                                    |
-| xc  | 192  | double                             |
+| xC0 | 192  | double                             |
+
+## Useful Info
 
 When something is length or size prefixed, the size is an unsigned 32 bit
 integer that is in between the code and the data. String keyed dicts can only
 have null terminated strings as their keys. String keyed dicts also guard twice
-the amount of objects as their length, as the first of each pair is a key.
-However, string key objects should not be prefixed with a type code.
+the amount of tags as their length, as the first of each pair is a key. However,
+string key objects should not be prefixed with a type code.
 
 Unlike string keyed dicts, integer keyed dicts prefix every value with a signed
 32 bit integer key.
 
-If the parser expects a type code, and receives a 0 (null), it should ignore it
-and move on to the next item.
-
-All data is big-endian.
+If a parser expects a type code, and receives a 0 (null), it should ignore it
+and move on to the next tag.
