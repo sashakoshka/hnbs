@@ -146,9 +146,7 @@ class Int {
     // im so sorry
     let buf = Buffer.alloc(intProps[this.#type][0] + 1)
     buf.writeUInt8(this.#type)
-    buf[intProps[this.#type][1]] (
-      (this.#type >= 134) ? BigInt(this.#value) : this.#value, 1
-    )
+    buf[intProps[this.#type][1]](this.#value, 1)
     return buf
   }
   
