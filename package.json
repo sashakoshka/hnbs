@@ -1,0 +1,19 @@
+{
+  "name": "@hlhv/hnbs",
+  "version": "1.0.0",
+  "description": "Holanet network binary structure",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --trace-uncaught tests/encode-decode.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sashakoshka/hnbs.git"
+  },
+  "author": "Sasha Koshka",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/sashakoshka/hnbs/issues"
+  },
+  "homepage": "https://github.com/sashakoshka/hnbs#readme"
+}
