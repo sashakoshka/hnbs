@@ -3,7 +3,11 @@ Holanet network binary structure
 
 Format for sending quickly parsable structured data over the network. Somewhat
 similar to the NBT format, except far more minimal, and with a greater
-structural similarity to that of JSON. All data is encoded as big-endian.
+structural similarity to that of JSON. All data is encoded as big-endian. The
+format is optimized for small size and parsing speed.
+
+Throughout this document, any data prefixed by a type code will be referred to
+as a "tag".
 
 ## Tag Types
 
@@ -41,3 +45,32 @@ Unlike string keyed dicts, integer keyed dicts prefix every value with a signed
 
 If a parser expects a type code, and receives a 0 (null), it should ignore it
 and move on to the next tag.
+
+## Format Explanation
+
+```
+let input = new hnbs.StrDict({
+  arrayTest: new hnbs.List([
+    hnbs.UInt16(324),
+    new hnbs.Double(2.234),
+    hnbs.Int8(-32),
+    hnbs.UInt8(2),
+    new hnbs.Str("a\nstring"),
+    new hnbs.Str("another string"),
+    hnbs.UInt8(0),
+    hnbs.Int32(-23500003),
+    hnbs.UInt64(2938749328473)
+  ]),
+  numberTest: hnbs.UInt8(43),
+  doubleTest: new hnbs.Double(234.23423423)
+})
+
+return input.encode()
+```
+
+The above code example produces this binary output:
+
+![Color coded binary output](documentation/binary%20analysis.svg)
+
+Type codes are shown in blue, lengths in purple, strings and string keys in
+green, null terminators in orange, and integer/double values in black.

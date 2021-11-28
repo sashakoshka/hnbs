@@ -137,9 +137,32 @@ class Int {
   #type
 
   constructor (type = 128, value = 0) {
-    if (type < 128 || type > 135) throw `invalid type ${type} for int`
-    this.#type = type
-    this.value = value
+    if (type < 128 || type > 133) throw `invalid type ${type} for Int`
+    this.#type  = type
+    this.#value = new (intProps[this.#type][2])([value])
+  }
+  
+  encode () {
+    // im so sorry
+    let buf = Buffer.alloc(intProps[this.#type][0] + 1)
+    buf.writeUInt8(this.#type)
+    buf[intProps[this.#type][1]](this.#value[0], 1)
+    return buf
+  }
+  
+  get type  () { return this.#type }
+  get value () { return this.#value[0] }
+  set value (value) { this.#value[0] = value }
+}
+
+class LongInt {
+  #value
+  #type
+
+  constructor (type = 134, value = 0) {
+    if (type < 134 || type > 135) throw `invalid type ${type} for LongInt`
+    this.#type  = type
+    this.#value = BigInt(value)
   }
   
   encode () {
@@ -152,10 +175,8 @@ class Int {
   
   get type  () { return this.#type }
   get value () { return this.#value }
-  set value (num) {
-    this.#value = new (intProps[this.#type][2])([
-      (this.#type >= 134) ? BigInt(num) : num
-    ])[0]
+  set value (value) {
+    this.#value[0] = (typeof value == "bigint") ? value : BigInt(value)
   }
 }
 
@@ -184,11 +205,11 @@ function Int32 (value) {
 }
 
 function UInt64 (value) {
-  return new Int(134, value)
+  return new LongInt(134, value)
 }
 
 function Int64 (value) {
-  return new Int(135, value)
+  return new LongInt(135, value)
 }
 
 /* stores a double precision value. unfortunately js only uses floats, so you
