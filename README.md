@@ -11,26 +11,26 @@ as a "tag".
 
 ## Tag Types
 
-| Hex | Code | Meaning                            | 
-| :-: | :--: | :------                            |
-| x00 | 0    | null                               |
-| x01 | 1    | length prefixed list               |
-| x02 | 2    | length prefixed integer keyed dict |
-| x03 | 3    | length prefixed string keyed dict  |
-|     |      |                                    |
-| x40 | 64   | size prefixed buffer               |
-| x41 | 65   | null terminated string             |
-|     |      |                                    |
-| x80 | 128  | unsigned 8 bit integer             |
-| x81 | 129  | signed 8 bit integer               |
-| x82 | 130  | unsigned 16 bit integer            |
-| x83 | 131  | signed 16 bit integer              |
-| x84 | 132  | unsigned 32 bit integer            |
-| x85 | 133  | signed 32 bit integer              |
-| x86 | 134  | unsigned 64 bit integer            |
-| x87 | 135  | signed 64 bit integer              |
-|     |      |                                    |
-| xC0 | 192  | double                             |
+| Hex | Code | Name    | Meaning                            | 
+| :-: | :--: | :------ | :------                            |
+| x00 | 0    | null    | null                               |
+| x01 | 1    | List    | length prefixed list               |
+| x02 | 2    | IntDict | length prefixed integer keyed dict |
+| x03 | 3    | StrDict | length prefixed string keyed dict  |
+|     |      |         |                                    |
+| x40 | 64   | Buff    | size prefixed buffer               |
+| x41 | 65   | Str     | null terminated string             |
+|     |      |         |                                    |
+| x80 | 128  | UInt8   | unsigned 8 bit integer             |
+| x81 | 129  | Int8    | signed 8 bit integer               |
+| x82 | 130  | UInt16  | unsigned 16 bit integer            |
+| x83 | 131  | Int16   | signed 16 bit integer              |
+| x84 | 132  | UInt32  | unsigned 32 bit integer            |
+| x85 | 133  | Int32   | signed 32 bit integer              |
+| x86 | 134  | UInt64  | unsigned 64 bit integer            |
+| x87 | 135  | Int64   | signed 64 bit integer              |
+|     |      |         |                                    |
+| xC0 | 192  | Double  | double                             |
 
 ## Useful Info
 
@@ -51,17 +51,17 @@ and move on to the next tag.
 ```
 let input = new hnbs.StrDict({
   arrayTest: new hnbs.List([
-    hnbs.UInt16(324),
+    new hnbs.UInt16(324),
     new hnbs.Double(2.234),
-    hnbs.Int8(-32),
-    hnbs.UInt8(2),
+    new hnbs.Int8(-32),
+    new hnbs.UInt8(2),
     new hnbs.Str("a\nstring"),
     new hnbs.Str("another string"),
-    hnbs.UInt8(0),
-    hnbs.Int32(-23500003),
-    hnbs.UInt64(2938749328473)
+    new hnbs.UInt8(0),
+    new hnbs.Int32(-23500003),
+    new hnbs.UInt64(2938749328473)
   ]),
-  numberTest: hnbs.UInt8(43),
+  numberTest: new hnbs.UInt8(43),
   doubleTest: new hnbs.Double(234.23423423)
 })
 

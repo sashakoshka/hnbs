@@ -1,5 +1,25 @@
 "use strict"
 
+const type = Object.freeze ({
+  List    : 0x01,
+  IntDict : 0x02,
+  StrDict : 0x03,
+
+  Buf     : 0x40,
+  Str     : 0x41,
+
+  UInt8   : 0x80,
+  Int8    : 0x81,
+  UInt16  : 0x82,
+  Int16   : 0x83,
+  UInt32  : 0x84,
+  Int32   : 0x85,
+  UInt64  : 0x86,
+  Int64   : 0x87,
+
+  Double  : 0xC0
+})
+
 // for quickly selecting utilities to process integers with
 const intProps = {
 //code size writemethod   array type
@@ -58,14 +78,14 @@ class Dict {
 
     for (const key in this.data) {
       if (
-        (this.#type == 2 && isNaN(key)) ||
-        (this.#type == 3 && !isNaN(key))
+        (this.#type == type.IntDict && isNaN(key)) ||
+        (this.#type == type.StrDict && !isNaN(key))
       ) {
         throw `invalid Dict key "${key}" (type ${typeof key}), expected ` +
               ((this.type == 2) ? "an integer" : "a string")
       }
       let keyBuf
-      if (this.#type == 2) {
+      if (this.#type == type.IntDict) {
         keyBuf = Buffer.alloc(4)
         keyBuf.writeInt32BE(key)
       } else {
@@ -85,11 +105,11 @@ class Dict {
 }
 
 function IntDict (data) {
-  return new Dict(2, data)
+  return new Dict(type.IntDict, data)
 }
 
 function StrDict (data) {
-  return new Dict(3, data)
+  return new Dict(type.StrDict, data)
 }
 
 // stores a size prefixed buffer
@@ -180,36 +200,36 @@ class LongInt {
   }
 }
 
-function UInt8 (value) {
-  return new Int(128, value)
+class UInt8 {
+  constructor (value) { return new Int(type.UInt8, value) }
 }
 
-function Int8 (value) {
-  return new Int(129, value)
+class Int8 {
+  constructor (value) { return new Int(type.Int8, value) }
 }
 
-function UInt16 (value) {
-  return new Int(130, value)
+class UInt16 {
+  constructor (value) { return new Int(type.UInt8, value) }
 }
 
-function Int16 (value) {
-  return new Int(131, value)
+class Int16 {
+  constructor (value) { return new Int(type.Int8, value) }
 }
 
-function UInt32 (value) {
-  return new Int(132, value)
+class UInt32 {
+  constructor (value) { return new Int(type.UInt32, value) }
 }
 
-function Int32 (value) {
-  return new Int(133, value)
+class Int32 {
+  constructor (value) { return new Int(type.Int32, value) }
 }
 
-function UInt64 (value) {
-  return new LongInt(134, value)
+class UInt64 {
+  constructor (value) { return new LongInt(type.UInt64, value) }
 }
 
-function Int64 (value) {
-  return new LongInt(135, value)
+class Int64 {
+  constructor (value) { return new LongInt(type.Int64, value) }
 }
 
 /* stores a double precision value. unfortunately js only uses floats, so you
@@ -268,5 +288,7 @@ module.exports = {
   Int64   : Int64,
   
   Double  : Double,
-  decode  : decode
+  decode  : decode,
+
+  type    : type
 }
