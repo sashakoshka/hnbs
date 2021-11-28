@@ -35,7 +35,7 @@ const intProps = {
 
 class List {
   data
-  #type = 1
+  #type = type.List
 
   constructor (data = []) {
     this.data = data
@@ -48,7 +48,7 @@ class List {
 
     for (const item of this.data) {
       try {
-        //valTag(item) TODO: fix
+        valTag(item)
       } catch (err) {
         throw "cannot encode List: " + err + ` - type is ${item.type}`
       }
@@ -65,8 +65,8 @@ class Dict {
   data
   #type
 
-  constructor (type = 2, data = {}) {
-    if (type < 2 || type > 3) throw `invalid type ${type} for dict`
+  constructor (type = type.IntDict, data = {}) {
+    if (type < type.IntDict || type > type.StrDict) throw `invalid type ${type} for dict`
     this.data  = data
     this.#type = type
   }
@@ -115,7 +115,7 @@ function StrDict (data) {
 // stores a size prefixed buffer
 class Buff {
   data
-  #type = 64
+  #type = type.Buff
 
   constructor (data = Buffer.alloc(0)) {
     this.data = data
@@ -134,7 +134,7 @@ class Buff {
 // stores a null terminated string
 class Str {
   data
-  #type = 65
+  #type = type.Str
 
   constructor (data = "") {
     this.data = data
@@ -156,8 +156,9 @@ class Int {
   #value
   #type
 
-  constructor (type = 128, value = 0) {
-    if (type < 128 || type > 133) throw `invalid type ${type} for Int`
+  constructor (type = type.UInt8, value = 0) {
+    if (type < type.UInt8 || type > type.Int16)
+      throw `invalid type ${type} for Int`
     this.#type  = type
     this.#value = new (intProps[this.#type][2])([value])
   }
@@ -179,8 +180,9 @@ class LongInt {
   #value
   #type
 
-  constructor (type = 134, value = 0) {
-    if (type < 134 || type > 135) throw `invalid type ${type} for LongInt`
+  constructor (type = type.UInt64, value = 0) {
+    if (type < type.UInt64 || type > type.Int64)
+      throw `invalid type ${type} for LongInt`
     this.#type  = type
     this.#value = BigInt(value)
   }
@@ -238,7 +240,7 @@ class Int64 {
    internally and providing some arithmetic member functions */
 class Double {
   value
-  #type = 192
+  #type = type.Double
 
   constructor (value = 0) {
     this.value = value 
@@ -255,7 +257,8 @@ class Double {
 }
 
 function valTag(tag) {
-  if ((tag.kind ?? 256) < 256) return
+  if ((tag.type ?? 256) < 256)
+    return
   throw "value is not a valid tag"
 }
 
