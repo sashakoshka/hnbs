@@ -1,11 +1,11 @@
 "use strict"
 
-const type = Object.freeze ({
+const types = Object.freeze ({
   List    : 0x01,
   IntDict : 0x02,
   StrDict : 0x03,
 
-  Buf     : 0x40,
+  Buff    : 0x40,
   Str     : 0x41,
 
   UInt8   : 0x80,
@@ -19,26 +19,6 @@ const type = Object.freeze ({
 
   Double  : 0xC0
 })
-
-const classDict = {
-  0x01 : List,
-  0x02 : IntDict,
-  0x03 : StrDict,
-
-  0x40 : Buf,
-  0x41 : Str,
-
-  0x80 : UInt8,
-  0x81 : Int8,
-  0x82 : UInt16,
-  0x83 : Int16,
-  0x84 : UInt32,
-  0x85 : Int32,
-  0x86 : UInt64,
-  0x87 : Int64,
-
-  0xC0 : Double
-}
 
 // for quickly selecting utilities to process integers with
 const intProps = {
@@ -55,7 +35,7 @@ const intProps = {
 
 class List {
   data
-  #type = type.List
+  #type = types.List
 
   constructor (data = []) {
     this.data = data
@@ -85,8 +65,9 @@ class Dict {
   data
   #type
 
-  constructor (type = type.IntDict, data = {}) {
-    if (type < type.IntDict || type > type.StrDict) throw `invalid type ${type} for dict`
+  constructor (type = types.IntDict, data = {}) {
+    if (type < types.IntDict || type > types.StrDict)
+      throw `invalid type ${type} for dict`
     this.data  = data
     this.#type = type
   }
@@ -98,14 +79,14 @@ class Dict {
 
     for (const key in this.data) {
       if (
-        (this.#type == type.IntDict && isNaN(key)) ||
-        (this.#type == type.StrDict && !isNaN(key))
+        (this.#type == types.IntDict && isNaN(key)) ||
+        (this.#type == types.StrDict && !isNaN(key))
       ) {
         throw `invalid Dict key "${key}" (type ${typeof key}), expected ` +
               ((this.type == 2) ? "an integer" : "a string")
       }
       let keyBuf
-      if (this.#type == type.IntDict) {
+      if (this.#type == types.IntDict) {
         keyBuf = Buffer.alloc(4)
         keyBuf.writeInt32BE(key)
       } else {
@@ -125,17 +106,17 @@ class Dict {
 }
 
 function IntDict (data) {
-  return new Dict(type.IntDict, data)
+  return new Dict(types.IntDict, data)
 }
 
 function StrDict (data) {
-  return new Dict(type.StrDict, data)
+  return new Dict(types.StrDict, data)
 }
 
 // stores a size prefixed buffer
 class Buff {
   data
-  #type = type.Buff
+  #type = types.Buff
 
   constructor (data = Buffer.alloc(0)) {
     this.data = data
@@ -143,7 +124,7 @@ class Buff {
   
   encode () {
     let buf = Buffer.alloc(5)
-    buf.writeUInt8BE(this.#type)
+    buf.writeUInt8(this.#type)
     buf.writeUInt32BE(this.data.length, 1)
     return Buffer.concat([buf, this.data])
   }
@@ -154,7 +135,7 @@ class Buff {
 // stores a null terminated string
 class Str {
   data
-  #type = type.Str
+  #type = types.Str
 
   constructor (data = "") {
     this.data = data
@@ -176,8 +157,8 @@ class Int {
   #value
   #type
 
-  constructor (type = type.UInt8, value = 0) {
-    if (type < type.UInt8 || type > type.Int16)
+  constructor (type = types.UInt8, value = 0) {
+    if (type < types.UInt8 || type > types.Int32)
       throw `invalid type ${type} for Int`
     this.#type  = type
     this.#value = new (intProps[this.#type][2])([value])
@@ -200,8 +181,8 @@ class LongInt {
   #value
   #type
 
-  constructor (type = type.UInt64, value = 0) {
-    if (type < type.UInt64 || type > type.Int64)
+  constructor (type = types.UInt64, value = 0) {
+    if (type < types.UInt64 || type > types.Int64)
       throw `invalid type ${type} for LongInt`
     this.#type  = type
     this.#value = BigInt(value)
@@ -223,35 +204,35 @@ class LongInt {
 }
 
 class UInt8 {
-  constructor (value) { return new Int(type.UInt8, value) }
+  constructor (value) { return new Int(types.UInt8, value) }
 }
 
 class Int8 {
-  constructor (value) { return new Int(type.Int8, value) }
+  constructor (value) { return new Int(types.Int8, value) }
 }
 
 class UInt16 {
-  constructor (value) { return new Int(type.UInt8, value) }
+  constructor (value) { return new Int(types.UInt16, value) }
 }
 
 class Int16 {
-  constructor (value) { return new Int(type.Int8, value) }
+  constructor (value) { return new Int(types.Int16, value) }
 }
 
 class UInt32 {
-  constructor (value) { return new Int(type.UInt32, value) }
+  constructor (value) { return new Int(types.UInt32, value) }
 }
 
 class Int32 {
-  constructor (value) { return new Int(type.Int32, value) }
+  constructor (value) { return new Int(types.Int32, value) }
 }
 
 class UInt64 {
-  constructor (value) { return new LongInt(type.UInt64, value) }
+  constructor (value) { return new LongInt(types.UInt64, value) }
 }
 
 class Int64 {
-  constructor (value) { return new LongInt(type.Int64, value) }
+  constructor (value) { return new LongInt(types.Int64, value) }
 }
 
 /* stores a double precision value. unfortunately js only uses floats, so you
@@ -260,7 +241,7 @@ class Int64 {
    internally and providing some arithmetic member functions */
 class Double {
   value
-  #type = type.Double
+  #type = types.Double
 
   constructor (value = 0) {
     this.value = value
@@ -283,6 +264,26 @@ function valTag(tag) {
   throw "input is not a valid tag"
 }
 
+const classDict = {
+  0x01 : List,
+  0x02 : IntDict,
+  0x03 : StrDict,
+
+  0x40 : Buff,
+  0x41 : Str,
+
+  0x80 : UInt8,
+  0x81 : Int8,
+  0x82 : UInt16,
+  0x83 : Int16,
+  0x84 : UInt32,
+  0x85 : Int32,
+  0x86 : UInt64,
+  0x87 : Int64,
+
+  0xC0 : Double
+}
+
 // call function with:
 // let [obj, buf] = decode(buf)
 function decode (data) {
@@ -292,7 +293,7 @@ function decode (data) {
   switch (code) {
     case 0: return null
 
-    case type.List: {
+    case types.List: {
       let size = data[0]
       data = data.slice(1)
       let items = []
@@ -300,13 +301,13 @@ function decode (data) {
 
       while (size --> 0) {
         [item, data] = decode(data)
-        items.push(item)
+        if (item) items.push(item)
       }
 
       return [new List(items), data]
     }
     
-    case type.IntDict: {
+    case types.IntDict: {
       let size = data[0]
       data = data.slice(1)
       let items = {}
@@ -315,13 +316,13 @@ function decode (data) {
       while (size --> 0) {
         let key = data.readInt32BE()
         [item, data] = decode(data.slice(4))
-        items[key] = item
+        if (item) items[key] = item
       }
 
       return [new IntDict(items), data]
     }
-    
-    case type.StrDict: {
+
+    case types.StrDict: {
       let size = data[0]
       data = data.slice(1)
       let items = {}
@@ -332,35 +333,41 @@ function decode (data) {
         let key = data.slice(0, len).toString("utf-8")
         
         [item, data] = decode(data.slice(len + 1))
-        items[key] = item
+        if (item) items[key] = item
       }
 
-      return [new IntDict(items), data]
+      return [new StrDict(items), data]
     }
     
-    case type.Buff: {
-      let size = data[0]
-      let buf = Buffer.allocate(size)
-      data.copy(buf, 0, 1, size + 1)
-      return [buf, data.slice(size)]
+    case types.Buff: {
+      let size = data.readInt32BE()
+      let buf = Buffer.alloc(size)
+      data.copy(buf, 0, 5, size + 5)
+      return [new Buff(buf), data.slice(size)]
     }
     
-    case type.Str: {
+    case types.Str: {
       let len = data.indexOf(0)
       let str = data.slice(0, len).toString("utf-8")
-      return [str, data.slice(len + 1)]
+      return [new Str(str), data.slice(len + 1)]
     }
 
-    case type.UInt8:  return [new Int(data.readUInt8()),    data.slice(1)]
-    case type.Int8:   return [new Int(data.readInt8()),     data.slice(1)]
-    case type.UInt16: return [new Int(data.readUInt16BE()), data.slice(2)]
-    case type.Int16:  return [new Int(data.readInt16BE()),  data.slice(2)]
-    case type.UInt32: return [new Int(data.readUInt32BE()), data.slice(4)]
-    case type.Int32:  return [new Int(data.readInt32BE()),  data.slice(4)]
-    case type.UInt64: return [new LongInt(data.readUInt64BE()), data.slice(8)]
-    case type.Int64:  return [new LongInt(data.readInt64BE()),  data.slice(8)]
+    case types.UInt8:  return [new Int(code, data.readUInt8()),    data.slice(1)]
+    case types.Int8:   return [new Int(code, data.readInt8()),     data.slice(1)]
+    case types.UInt16: return [new Int(code, data.readUInt16BE()), data.slice(2)]
+    case types.Int16:  return [new Int(code, data.readInt16BE()),  data.slice(2)]
+    case types.UInt32: return [new Int(code, data.readUInt32BE()), data.slice(4)]
+    case types.Int32:  return [new Int(code, data.readInt32BE()),  data.slice(4)]
+    case types.UInt64: return [
+                        new LongInt(code, data.readUInt64BE()),
+                        data.slice(8)
+                      ]
+    case types.Int64:  return [
+                        new LongInt(code, data.readInt64BE()),
+                        data.slice(8)
+                      ]
     
-    case type.Double: return [new Double(data.readDoubleBE(1)), data.slice(8)]
+    case types.Double: return [new Double(data.readDoubleBE(1)), data.slice(8)]
 
     default: throw `type code ${code} is unrecognized`
   }
@@ -389,5 +396,5 @@ module.exports = {
   Double  : Double,
   
   decode  : decode,
-  type    : type
+  types   : types
 }
