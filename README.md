@@ -103,9 +103,9 @@ the tag into binary data and returns it in a `Buffer` object. The output of any
 one of these functions is a valid, standalone HNBS object, and can be
 transmitted or stored as-is.
 
-#### List
+#### `new List([data])`
 
-`new List([data])`
+- `data` <Array> An array containing all child tags.
 
 An object representing the `List` tag. Lists have a `data` member, which is just
 an array containing its child objects. You can pass an array of objects to the
@@ -113,43 +113,161 @@ constructor to set it as its data. Be aware, however, that if you try to encode
 a `List` that contains things which are not valid tags, an error will be thrown.
 This also goes for all types of Dict.
 
-#### Dict
+#### `new Dict(type[, data])`
 
-`new Dict(type[, data])`
+- `type` <integer> The type code for this object
+- `data` <Object> An object containing key/value pairs, with values being tags.
 
 A class that is able to represent an IntDict, and a StrDict. To find out which
-it is, there is a handy type member you can check. It has a `data` member which
-is one marvelous JavaScript curly brace object that is either keyed by integers,
-or by strings. You can pass one of these to the constructor to set it as its
-data member. Be aware that if your keys don't match the `Dict`'s type, (such as
-having one or more integer keys in a `StrDict`), you will get an error if you
-try encoding the object.
+it is, there is a handy `type` member you can check. It has a `data` member
+which is one marvelous JavaScript curly brace object that is either keyed by
+integers, or by strings. You can pass one of these to the constructor to set it
+as its data member. Be aware that if your keys don't match the `Dict`'s type,
+(such as having one or more integer keys in a `StrDict`), you will get an error
+if you try encoding the object.
 
-#### IntDict
+#### `new IntDict([data])`
 
-`new IntDict([data])`
+- `data` <Object> An object containing key/value pairs, with keys being
+  integers, and values being tags.
 
 A wrapper around `Dict` that literally just constructs a `Dict` of type
 `IntDict`. The only difference is its constructor doesn't need a type code.
 
-#### StrDict
+#### `new StrDict([data])`
 
-`new StrDict([data])`
+- `data` <Object> An object containing key/value pairs, with keys being strings,
+  and values being tags.
 
 See `IntDict`. Just pretend it's talking about strings instead of ints.
 
-#### Buff
+#### `new Buff([data])`
 
-`new Buff([data])`
+- `data` <Buffer> A buffer for this tag to contain
 
 Represents a buffer tag. Has a `data` member which consists of a `Buffer`
 object. You may pass a `Buffer` object in to the constructor to set it as the
 data.
 
-#### Str
+#### `new Str([data])`
 
-`new Str([data])`
+- `data` <string> A string for this tag to contain
 
 Pretty much the same as as `Buff`, but instead of a `Buffer` it's a string.
 However, unlike `Buff`, `Str` is not prefixed by length, but it is terminated by
 a null character.
+
+#### `new Int(type[, value])`
+
+- `type` <integer> The type code for this object
+- `value` <integer> The value that this object should hold
+
+`Int`, similar to `Dict`, is a general class. that is used for all integer tags.
+Its `type` member can be checked to determine what kind of integer it is. This
+class has a `value` member that stores its value.
+
+#### `new LongInt(type[, value])`
+
+- `type` <integer> The type code for this object
+- `value` <integer> The value that this object should hold
+
+`LongInt`, similar to `Int`, is a general class that is used for integer tags.
+However, `LongInt` is used for integers 64 bits in size or greater. Currently,
+64 bit integers are the only supported types. This class contains a `BigInt`,
+which is accessible through the `value` member. If value is set to something
+other than a `BigInt`, the conversion is done automatically
+
+#### `new UInt8([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns an `Int` of the proper type. The `Int`
+will hold an unsigned 8 bit integer value.
+
+#### `new Int8([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns an `Int` of the proper type. The `Int`
+will hold a signed 8 bit integer value.
+
+#### `new UInt16([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns an `Int` of the proper type. The `Int`
+will hold an unsigned 16 bit integer value.
+
+#### `new Int16([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns an `Int` of the proper type. The `Int`
+will hold a signed 16 bit integer value.
+
+#### `new UInt32([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns an `Int` of the proper type. The `Int`
+will hold an unsigned 32 bit integer value.
+
+#### `new Int32([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns an `Int` of the proper type. The `Int`
+will hold a signed 32 bit integer value.
+
+#### `new UInt64([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns a `LongInt` of the proper type. The
+`LongInt` will hold an unsigned 64 bit integer value.
+
+#### `new Int64([value])`
+
+- `value` <integer> The value that this object should hold
+
+A wrapper that constructs and returns an `LongInt` of the proper type. The
+`LongInt` will hold a signed 64 bit integer value.
+
+#### `new Double([value])`
+
+- `value` <number> The value that this object should hold
+
+An object that stores a double value. Currently, it technically only stores a
+float, but this precision will probably be upgraded in the future.
+
+#### decode(data)
+
+- `data` <Buffer> The buffer to read from
+- Returns: [ <Int> | <List> | ... etc, <Buffer> ]
+
+`decode` reads one tag from `data`, and then returns the object it read, and the
+input buffer with the portion it read sliced off. A good way to call this
+function is something like: `[object, data] = decode(data)`.
+
+#### type
+
+`type` is an "enum" that should be used to refer to type codes. It has these
+attributes:
+
+- `List`: 0x01
+- `IntDict`: 0x02
+- `StrDict`: 0x03
+- `Buf`: 0x40
+- `Str`: 0x41
+- `UInt8`: 0x80
+- `Int8`: 0x81
+- `UInt16`: 0x82
+- `Int16`: 0x83
+- `UInt32`: 0x84
+- `Int32`: 0x85
+- `UInt64`: 0x86
+- `Int64`: 0x87
+- `Double`: 0xC0
+
+If you want to use type codes programmatically, you should use this object
+instead of the plain numbers.

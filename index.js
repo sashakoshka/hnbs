@@ -263,7 +263,7 @@ class Double {
   #type = type.Double
 
   constructor (value = 0) {
-    this.value = value 
+    this.value = value
   }
   
   encode () {
@@ -376,6 +376,7 @@ module.exports = {
   Str     : Str,
   
   Int     : Int,
+  LongInt : LongInt,
   UInt8   : UInt8,
   Int8    : Int8,
   UInt16  : UInt16,
@@ -386,7 +387,7 @@ module.exports = {
   Int64   : Int64,
   
   Double  : Double,
+  
   decode  : decode,
-
   type    : type
 }
