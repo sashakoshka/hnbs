@@ -57,7 +57,7 @@ class List {
     
     return buf
   }
-  
+    
   get type () { return this.#type }
 }
 
@@ -294,8 +294,8 @@ function decode (data) {
     case 0: return null
 
     case types.List: {
-      let size = data[0]
-      data = data.slice(1)
+      let size = data.readInt32BE()
+      data = data.slice(4)
       let items = []
       let item
 
@@ -308,8 +308,8 @@ function decode (data) {
     }
     
     case types.IntDict: {
-      let size = data[0]
-      data = data.slice(1)
+      let size = data.readInt32BE()
+      data = data.slice(4)
       let items = {}
       let item
 
@@ -323,8 +323,8 @@ function decode (data) {
     }
 
     case types.StrDict: {
-      let size = data[0]
-      data = data.slice(1)
+      let size = data.readInt32BE()
+      data = data.slice(4)
       let items = {}
       let item
 
@@ -359,15 +359,15 @@ function decode (data) {
     case types.UInt32: return [new Int(code, data.readUInt32BE()), data.slice(4)]
     case types.Int32:  return [new Int(code, data.readInt32BE()),  data.slice(4)]
     case types.UInt64: return [
-                        new LongInt(code, data.readUInt64BE()),
+                        new LongInt(code, data.readBigUInt64BE()),
                         data.slice(8)
                       ]
     case types.Int64:  return [
-                        new LongInt(code, data.readInt64BE()),
+                        new LongInt(code, data.readBigInt64BE()),
                         data.slice(8)
                       ]
     
-    case types.Double: return [new Double(data.readDoubleBE(1)), data.slice(8)]
+    case types.Double: return [new Double(data.readDoubleBE(0)), data.slice(8)]
 
     default: throw `type code ${code} is unrecognized`
   }
