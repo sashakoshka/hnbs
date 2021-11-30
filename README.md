@@ -1,10 +1,16 @@
 # hnbs
 Holanet network binary structure
 
-Format for sending quickly parsable structured data over the network. Somewhat
-similar to the NBT format, except far more minimal, and with a greater
-structural similarity to that of JSON. All data is encoded as big-endian. The
-format is optimized for small size and parsing speed.
+A word of warning: this is intentionally untested for versions of NodeJS less
+than 14. This is because I am mad at the Debian maintainers for shipping an
+extremely out of date version of Node. If you're going to use this module for
+some reason and your distribution offers an archaic Node version, you can use
+NVM or something. Or install Alpine, the best Linux distribution. 
+
+HNBS is a format for sending quickly parsable structured data over the network.
+It is somewhat similar to the NBT format, except far more minimal, and with a
+greater structural similarity to that of JSON.  This format is optimized for
+small size and parsing speed. All data is encoded as big-endian.
 
 Throughout this document, any data prefixed by a type code will be referred to
 as a "tag".
@@ -74,3 +80,76 @@ The above code example produces this binary output:
 
 Type codes are shown in blue, lengths in purple, strings and string keys in
 green, null terminators in orange, and integer/double values in black.
+
+## This Node Module
+
+This repository's main purpose is for the hnbs NodeJS module, which can be
+installed in your project by navigating to its directory and running:
+
+`npm istall @hlhv/hnbs`
+
+The module will give you these things:
+
+### Module Exports
+
+#### All Tag Classes:
+
+All classes representing tags have a `type` member which allows you to easily
+determine what sort of thing it is, especially with generalized classes such as
+`Dict` and `Int`.
+
+They also all have a member function called `encode`. This recursively encodes
+the tag into binary data and returns it in a `Buffer` object. The output of any
+one of these functions is a valid, standalone HNBS object, and can be
+transmitted or stored as-is.
+
+#### List
+
+`new List([data])`
+
+An object representing the `List` tag. Lists have a `data` member, which is just
+an array containing its child objects. You can pass an array of objects to the
+constructor to set it as its data. Be aware, however, that if you try to encode
+a `List` that contains things which are not valid tags, an error will be thrown.
+This also goes for all types of Dict.
+
+#### Dict
+
+`new Dict(type[, data])`
+
+A class that is able to represent an IntDict, and a StrDict. To find out which
+it is, there is a handy type member you can check. It has a `data` member which
+is one marvelous JavaScript curly brace object that is either keyed by integers,
+or by strings. You can pass one of these to the constructor to set it as its
+data member. Be aware that if your keys don't match the `Dict`'s type, (such as
+having one or more integer keys in a `StrDict`), you will get an error if you
+try encoding the object.
+
+#### IntDict
+
+`new IntDict([data])`
+
+A wrapper around `Dict` that literally just constructs a `Dict` of type
+`IntDict`. The only difference is its constructor doesn't need a type code.
+
+#### StrDict
+
+`new StrDict([data])`
+
+See `IntDict`. Just pretend it's talking about strings instead of ints.
+
+#### Buff
+
+`new Buff([data])`
+
+Represents a buffer tag. Has a `data` member which consists of a `Buffer`
+object. You may pass a `Buffer` object in to the constructor to set it as the
+data.
+
+#### Str
+
+`new Str([data])`
+
+Pretty much the same as as `Buff`, but instead of a `Buffer` it's a string.
+However, unlike `Buff`, `Str` is not prefixed by length, but it is terminated by
+a null character.

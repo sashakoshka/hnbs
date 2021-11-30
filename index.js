@@ -20,6 +20,26 @@ const type = Object.freeze ({
   Double  : 0xC0
 })
 
+const classDict = {
+  0x01 : List,
+  0x02 : IntDict,
+  0x03 : StrDict,
+
+  0x40 : Buf,
+  0x41 : Str,
+
+  0x80 : UInt8,
+  0x81 : Int8,
+  0x82 : UInt16,
+  0x83 : Int16,
+  0x84 : UInt32,
+  0x85 : Int32,
+  0x86 : UInt64,
+  0x87 : Int64,
+
+  0xC0 : Double
+}
+
 // for quickly selecting utilities to process integers with
 const intProps = {
 //code size writemethod   array type
@@ -259,16 +279,91 @@ class Double {
 function valTag(tag) {
   if ((tag.type ?? 256) < 256)
     return
-  throw "value is not a valid tag"
+  if (tag.type !== undefined) throw `type code ${tag.type} is unrecognized`
+  throw "input is not a valid tag"
 }
 
+// call function with:
+// let [obj, buf] = decode(buf)
 function decode (data) {
-  let i = 0, obj
-  decode_recurse(data, obj, i)
-}
+  let obj, i = 0, code = data[0]
+  data = data.slice(1)
 
-function decode_recurse (data, obj, i) {
-  
+  switch (code) {
+    case 0: return null
+
+    case type.List: {
+      let size = data[0]
+      data = data.slice(1)
+      let items = []
+      let item
+
+      while (size --> 0) {
+        [item, data] = decode(data)
+        items.push(item)
+      }
+
+      return [new List(items), data]
+    }
+    
+    case type.IntDict: {
+      let size = data[0]
+      data = data.slice(1)
+      let items = {}
+      let item
+
+      while (size --> 0) {
+        let key = data.readInt32BE()
+        [item, data] = decode(data.slice(4))
+        items[key] = item
+      }
+
+      return [new IntDict(items), data]
+    }
+    
+    case type.StrDict: {
+      let size = data[0]
+      data = data.slice(1)
+      let items = {}
+      let item
+
+      while (size --> 0) {
+        let len = data.indexOf(0)
+        let key = data.slice(0, len).toString("utf-8")
+        
+        [item, data] = decode(data.slice(len + 1))
+        items[key] = item
+      }
+
+      return [new IntDict(items), data]
+    }
+    
+    case type.Buff: {
+      let size = data[0]
+      let buf = Buffer.allocate(size)
+      data.copy(buf, 0, 1, size + 1)
+      return [buf, data.slice(size)]
+    }
+    
+    case type.Str: {
+      let len = data.indexOf(0)
+      let str = data.slice(0, len).toString("utf-8")
+      return [str, data.slice(len + 1)]
+    }
+
+    case type.UInt8:  return [new Int(data.readUInt8()),    data.slice(1)]
+    case type.Int8:   return [new Int(data.readInt8()),     data.slice(1)]
+    case type.UInt16: return [new Int(data.readUInt16BE()), data.slice(2)]
+    case type.Int16:  return [new Int(data.readInt16BE()),  data.slice(2)]
+    case type.UInt32: return [new Int(data.readUInt32BE()), data.slice(4)]
+    case type.Int32:  return [new Int(data.readInt32BE()),  data.slice(4)]
+    case type.UInt64: return [new LongInt(data.readUInt64BE()), data.slice(8)]
+    case type.Int64:  return [new LongInt(data.readInt64BE()),  data.slice(8)]
+    
+    case type.Double: return [new Double(data.readDoubleBE(1)), data.slice(8)]
+
+    default: throw `type code ${code} is unrecognized`
+  }
 }
 
 module.exports = {
