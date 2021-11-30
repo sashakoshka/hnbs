@@ -105,7 +105,8 @@ transmitted or stored as-is.
 
 #### `new List([data])`
 
-- `data` <Array> An array containing all child tags.
+- `data` `Array` An array containing all child tags.
+- Returns: `List`
 
 An object representing the `List` tag. Lists have a `data` member, which is just
 an array containing its child objects. You can pass an array of objects to the
@@ -115,8 +116,9 @@ This also goes for all types of Dict.
 
 #### `new Dict(type[, data])`
 
-- `type` <integer> The type code for this object
-- `data` <Object> An object containing key/value pairs, with values being tags.
+- `type` `integer` The type code for this object
+- `data` `Object` An object containing key/value pairs, with values being tags.
+- Returns: `Dict`
 
 A class that is able to represent an IntDict, and a StrDict. To find out which
 it is, there is a handy `type` member you can check. It has a `data` member
@@ -128,22 +130,25 @@ if you try encoding the object.
 
 #### `new IntDict([data])`
 
-- `data` <Object> An object containing key/value pairs, with keys being
+- `data` `Object` An object containing key/value pairs, with keys being
   integers, and values being tags.
+- Returns: `IntDict`
 
 A wrapper around `Dict` that literally just constructs a `Dict` of type
 `IntDict`. The only difference is its constructor doesn't need a type code.
 
 #### `new StrDict([data])`
 
-- `data` <Object> An object containing key/value pairs, with keys being strings,
+- `data` `Object` An object containing key/value pairs, with keys being strings,
   and values being tags.
+- Returns: `StrDict`
 
 See `IntDict`. Just pretend it's talking about strings instead of ints.
 
 #### `new Buff([data])`
 
-- `data` <Buffer> A buffer for this tag to contain
+- `data` `Buffer` A buffer for this tag to contain
+- Returns: `Buff`
 
 Represents a buffer tag. Has a `data` member which consists of a `Buffer`
 object. You may pass a `Buffer` object in to the constructor to set it as the
@@ -151,7 +156,8 @@ data.
 
 #### `new Str([data])`
 
-- `data` <string> A string for this tag to contain
+- `data` `string` A string for this tag to contain
+- Returns: `Str`
 
 Pretty much the same as as `Buff`, but instead of a `Buffer` it's a string.
 However, unlike `Buff`, `Str` is not prefixed by length, but it is terminated by
@@ -159,8 +165,9 @@ a null character.
 
 #### `new Int(type[, value])`
 
-- `type` <integer> The type code for this object
-- `value` <integer> The value that this object should hold
+- `type` `integer` The type code for this object
+- `value` `integer` The value that this object should hold
+- Returns: `Int`
 
 `Int`, similar to `Dict`, is a general class. that is used for all integer tags.
 Its `type` member can be checked to determine what kind of integer it is. This
@@ -168,8 +175,9 @@ class has a `value` member that stores its value.
 
 #### `new LongInt(type[, value])`
 
-- `type` <integer> The type code for this object
-- `value` <integer> The value that this object should hold
+- `type` `integer` The type code for this object
+- `value` `integer` The value that this object should hold
+- Returns: `LongInt`
 
 `LongInt`, similar to `Int`, is a general class that is used for integer tags.
 However, `LongInt` is used for integers 64 bits in size or greater. Currently,
@@ -179,71 +187,80 @@ other than a `BigInt`, the conversion is done automatically
 
 #### `new UInt8([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `Int`
 
 A wrapper that constructs and returns an `Int` of the proper type. The `Int`
 will hold an unsigned 8 bit integer value.
 
 #### `new Int8([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `Int`
 
 A wrapper that constructs and returns an `Int` of the proper type. The `Int`
 will hold a signed 8 bit integer value.
 
 #### `new UInt16([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `Int`
 
 A wrapper that constructs and returns an `Int` of the proper type. The `Int`
 will hold an unsigned 16 bit integer value.
 
 #### `new Int16([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `Int`
 
 A wrapper that constructs and returns an `Int` of the proper type. The `Int`
 will hold a signed 16 bit integer value.
 
 #### `new UInt32([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `Int`
 
 A wrapper that constructs and returns an `Int` of the proper type. The `Int`
 will hold an unsigned 32 bit integer value.
 
 #### `new Int32([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `Int`
 
 A wrapper that constructs and returns an `Int` of the proper type. The `Int`
 will hold a signed 32 bit integer value.
 
 #### `new UInt64([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `LongInt`
 
 A wrapper that constructs and returns a `LongInt` of the proper type. The
 `LongInt` will hold an unsigned 64 bit integer value.
 
 #### `new Int64([value])`
 
-- `value` <integer> The value that this object should hold
+- `value` `integer` The value that this object should hold
+- Returns: `LongInt`
 
 A wrapper that constructs and returns an `LongInt` of the proper type. The
 `LongInt` will hold a signed 64 bit integer value.
 
 #### `new Double([value])`
 
-- `value` <number> The value that this object should hold
+- `value` `number` The value that this object should hold
+- Returns: `Double`
 
 An object that stores a double value. Currently, it technically only stores a
 float, but this precision will probably be upgraded in the future.
 
 #### decode(data)
 
-- `data` <Buffer> The buffer to read from
-- Returns: [ <Int> | <List> | ... etc, <Buffer> ]
+- `data` `Buffer` The buffer to read from
+- Returns: [ `Int` | `List` | ... etc, `Buffer` ]
 
 `decode` reads one tag from `data`, and then returns the object it read, and the
 input buffer with the portion it read sliced off. A good way to call this
