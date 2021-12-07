@@ -315,7 +315,10 @@ function decode (data) {
 
       while (size --> 0) {
         let key = data.readInt32BE()
-        [item, data] = decode(data.slice(4))
+        console.log(key)
+        let res = decode(data.slice(4))
+        item = res[0]
+        data = res[1]
         if (item) items[key] = item
       }
 
@@ -331,8 +334,10 @@ function decode (data) {
       while (size --> 0) {
         let len = data.indexOf(0)
         let key = data.slice(0, len).toString("utf-8")
-        
-        [item, data] = decode(data.slice(len + 1))
+
+        let res = decode(data.slice(len + 1))
+        item = res[0]
+        data = res[1]
         if (item) items[key] = item
       }
 
