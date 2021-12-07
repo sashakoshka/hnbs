@@ -315,7 +315,6 @@ function decode (data) {
 
       while (size --> 0) {
         let key = data.readInt32BE()
-        console.log(key)
         let res = decode(data.slice(4))
         item = res[0]
         data = res[1]
