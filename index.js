@@ -346,7 +346,7 @@ function decode (data) {
     case types.Buff: {
       let size = data.readInt32BE()
       let buf = Buffer.alloc(size)
-      data.copy(buf, 0, 5, size + 5)
+      data.copy(buf, 0, 4, size + 4)
       return [new Buff(buf), data.slice(size)]
     }
     

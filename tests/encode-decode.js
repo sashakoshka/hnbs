@@ -19,7 +19,8 @@ let input = new hnbs.StrDict({
   intDictTest: new hnbs.IntDict ({
      4: new hnbs.Str("number four"),
     23: new hnbs.Str("it is twenty three")
-  })
+  }),
+  buffTest: new hnbs.Buff(Buffer.from([0x4, 0x6A, 0x3F]))
 })
 
 console.log(JSON.stringify(input))
