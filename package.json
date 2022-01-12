@@ -1,6 +1,6 @@
 {
   "name": "@hlhv/hnbs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Holanet network binary structure",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/sashakoshka/hnbs.git"
   },
   "author": "Sasha Koshka",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/sashakoshka/hnbs/issues"
   },
