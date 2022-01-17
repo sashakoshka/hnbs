@@ -103,6 +103,11 @@ the tag into binary data and returns it in a `Buffer` object. The output of any
 one of these functions is a valid, standalone HNBS object, and can be
 transmitted or stored as-is.
 
+They also all have a member function called `test` that takes in a reference
+HNBS object, and checks to see if the structure defined in the reference is
+present within itself. This makes checking to see if data that is required is
+present.
+
 #### `new List([data])`
 
 - `data` `<Array>` An array containing all child tags.
@@ -254,8 +259,7 @@ A wrapper that constructs and returns an `LongInt` of the proper type. The
 - `value` `<number>` The value that this object should hold
 - Returns: `<Double>`
 
-An object that stores a double value. Currently, it technically only stores a
-float, but this precision will probably be upgraded in the future.
+An object that stores a double value.
 
 #### decode(data)
 

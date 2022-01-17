@@ -57,6 +57,17 @@ class List {
     
     return buf
   }
+
+  test (reference) {
+    if (
+      reference?.type  !== this.type ||
+      this.data.length <   reference.data.length
+    ) return false
+    for (let i = 0; i < reference.data.length; i++) {
+      if (!this.data[i].test(reference.data[i])) return false
+    }
+    return true
+  }
     
   get type () { return this.#type }
 }
@@ -102,6 +113,18 @@ class Dict {
     return buf
   }
   
+  test (reference) {
+    if (
+      reference?.type  !== this.type ||
+      this.data.length <   reference.data.length
+    ) return false
+    for (const key in reference.data) {
+      if (!reference.data[key])
+      if (!this.data[key].test(reference.data[key])) return false
+    }
+    return true
+  }
+  
   get type () { return this.#type }
 }
 
@@ -129,6 +152,8 @@ class Buff {
     return Buffer.concat([buf, this.data])
   }
 
+  test (reference) { return reference?.type === this.type }
+
   get type () { return this.#type }
 }
 
@@ -147,6 +172,8 @@ class Str {
     buf.write(this.data, 1, "utf-8") // last char will be null, perfect!
     return buf
   }
+  
+  test (reference) { return reference?.type === this.type }
 
   get type () { return this.#type }
 }
@@ -172,6 +199,8 @@ class Int {
     return buf
   }
   
+  test (reference) { return reference?.type === this.type }
+
   get type  () { return this.#type }
   get value () { return this.#value[0] }
   set value (value) { this.#value[0] = value }
@@ -195,6 +224,8 @@ class LongInt {
     buf[intProps[this.#type][1]](this.#value, 1)
     return buf
   }
+
+  test (reference) { return reference?.type === this.type }
   
   get type  () { return this.#type }
   get value () { return this.#value }
@@ -235,10 +266,7 @@ class Int64 {
   constructor (value) { return new LongInt(types.Int64, value) }
 }
 
-/* stores a double precision value. unfortunately js only uses floats, so you
-   may lose some precision here...
-   i might try to mitigate this in the future by using a buffer to store it
-   internally and providing some arithmetic member functions */
+/* stores a double precision floating point value. */
 class Double {
   value
   #type = types.Double
@@ -253,6 +281,8 @@ class Double {
     buf.writeDoubleBE(this.value, 1)
     return buf
   }
+
+  test (reference) { return reference?.type === this.type }
   
   get type () { return this.#type }
 }

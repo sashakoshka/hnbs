@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/sashakoshka/hnbs/issues"
   },
-  "homepage": "https://github.com/sashakoshka/hnbs#readme"
+  "homepage": "https://github.com/sashakoshka/hnbs#readme",
+  "files": [
+    "index.js"
+  ]
 }
