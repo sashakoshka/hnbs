@@ -108,6 +108,9 @@ HNBS object, and checks to see if the structure defined in the reference is
 present within itself. This makes checking to see if data that is required is
 present.
 
+They also have a member function called `toObj`. This tries its best to convert
+the tag's data to a normal JavaScript object.
+
 #### `new List([data])`
 
 - `data` `<Array>` An array containing all child tags.
@@ -269,6 +272,15 @@ An object that stores a double value.
 `decode` reads one tag from `data`, and then returns the object it read, and the
 input buffer with the portion it read sliced off. A good way to call this
 function is something like: `[object, data] = decode(data)`.
+
+##### fromObj(obj)
+
+- `obj` `<string>` | `<number>` | ... etc The value to convert to an hnbs
+  object.
+- Returns: `<Str>` | `<Double>` ... etc
+
+`fromObj` takes in any value except for a function, and converts it into an hnbs
+object.
 
 #### type
 

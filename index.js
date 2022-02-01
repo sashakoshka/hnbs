@@ -50,12 +50,21 @@ class List {
       try {
         valTag(item)
       } catch (err) {
-        throw "cannot encode List: " + err + ` - type is ${item.type}`
+        throw new Error (
+          "cannot encode List: " + err + ` - type is ${item.type}`
+        )
       }
       buf = Buffer.concat([buf, item.encode()])
     }
     
     return buf
+  }
+
+  toObj () {
+    let ret = []
+    for (const item of this.data)
+      ret.push(item.toObj())
+    return ret
   }
 
   test (reference) {
@@ -68,7 +77,7 @@ class List {
     }
     return true
   }
-    
+  
   get type () { return this.#type }
 }
 
@@ -78,7 +87,7 @@ class Dict {
 
   constructor (type = types.IntDict, data = {}) {
     if (type < types.IntDict || type > types.StrDict)
-      throw `invalid type ${type} for dict`
+      throw new Error(`invalid type ${type} for dict`)
     this.data  = data
     this.#type = type
   }
@@ -93,8 +102,10 @@ class Dict {
         (this.#type == types.IntDict && isNaN(key)) ||
         (this.#type == types.StrDict && !isNaN(key))
       ) {
-        throw `invalid Dict key "${key}" (type ${typeof key}), expected ` +
-              ((this.type == 2) ? "an integer" : "a string")
+        throw new Error (
+          `invalid Dict key "${key}" (type ${typeof key}), expected ` +
+          ((this.type == 2) ? "an integer" : "a string")
+        )
       }
       let keyBuf
       if (this.#type == types.IntDict) {
@@ -104,13 +115,20 @@ class Dict {
         keyBuf = Buffer.alloc(key.length + 1)
         keyBuf.write(key, "utf-8")
       }
-      
+
       buf = Buffer.concat([buf, keyBuf, this.data[key].encode()])
       len ++
     }
     buf.writeUInt32BE(len, 1)
     
     return buf
+  }
+
+  toObj () {
+    let ret = {}
+    for (const key in this.data)
+      ret[key] = this.data[key].toObj()
+    return ret
   }
   
   test (reference) {
@@ -152,6 +170,8 @@ class Buff {
     return Buffer.concat([buf, this.data])
   }
 
+  toObj () {return this.data}
+
   test (reference) { return reference?.type === this.type }
 
   get type () { return this.#type }
@@ -172,6 +192,8 @@ class Str {
     buf.write(this.data, 1, "utf-8") // last char will be null, perfect!
     return buf
   }
+
+  toObj () {return this.data}
   
   test (reference) { return reference?.type === this.type }
 
@@ -186,7 +208,7 @@ class Int {
 
   constructor (type = types.UInt8, value = 0) {
     if (type < types.UInt8 || type > types.Int32)
-      throw `invalid type ${type} for Int`
+      throw new Error(`invalid type ${type} for Int`)
     this.#type  = type
     this.#value = new (intProps[this.#type][2])([value])
   }
@@ -198,6 +220,8 @@ class Int {
     buf[intProps[this.#type][1]](this.#value[0], 1)
     return buf
   }
+
+  toObj () {return this.#value}
   
   test (reference) { return reference?.type === this.type }
 
@@ -212,7 +236,7 @@ class LongInt {
 
   constructor (type = types.UInt64, value = 0) {
     if (type < types.UInt64 || type > types.Int64)
-      throw `invalid type ${type} for LongInt`
+      throw new Error(`invalid type ${type} for LongInt`)
     this.#type  = type
     this.#value = BigInt(value)
   }
@@ -224,6 +248,8 @@ class LongInt {
     buf[intProps[this.#type][1]](this.#value, 1)
     return buf
   }
+
+  toObj () {return this.#value}
 
   test (reference) { return reference?.type === this.type }
   
@@ -282,6 +308,8 @@ class Double {
     return buf
   }
 
+  toObj () {return this.value}
+
   test (reference) { return reference?.type === this.type }
   
   get type () { return this.#type }
@@ -290,8 +318,9 @@ class Double {
 function valTag(tag) {
   if ((tag.type ?? 256) < 256)
     return
-  if (tag.type !== undefined) throw `type code ${tag.type} is unrecognized`
-  throw "input is not a valid tag"
+  if (tag.type !== undefined)
+    throw new Error(`type code ${tag.type} is unrecognized`)
+  throw new Error("input is not a valid tag")
 }
 
 const classDict = {
@@ -403,7 +432,51 @@ function decode (data) {
     
     case types.Double: return [new Double(data.readDoubleBE(0)), data.slice(8)]
 
-    default: throw `type code ${code} is unrecognized`
+    default: throw new Error(`type code ${code} is unrecognized`)
+  }
+}
+
+const hnbsClasses = [
+  "List",
+  "Dict",
+  "Buff",
+  "Str",
+  "Int",
+  "LongInt",
+  "Double"
+]
+
+function fromObj (obj) {
+  // if we are given an hnbs object, just return it
+  if (hnbsClasses.includes(obj.constructor.name)) return obj
+
+  switch (typeof obj) {
+    case "string":  return new Str(obj);             break
+    case "number":  return new Double(obj);          break
+    case "bigint":  return new Int64(obj);           break
+    case "symbol":  return new Str(obj.description); break
+    case "boolean": return new UInt8(obj ? 1 : 0);   break
+    case "undefined":
+    case "null":    return new UInt8(0);             break
+
+    case "object": {
+      let ret
+      if (obj.constructor.name === "Array") {
+        ret = new List([])
+        for (const item of obj)
+          ret.data.push(fromObj(item))
+      } if (obj.constructor.name === "Buffer") {
+        return new Buff(obj)
+      } else {
+        ret = new StrDict({})
+        for (const key in obj)
+          ret.data[key] = fromObj(obj[key])
+      }
+      return ret
+    } break
+
+    case "function": throw new Error(`hnbs cannot encode functions`)
+    default: throw new Error(`type ${typeof obj} is not supported (yet)`)
   }
 }
 
@@ -430,5 +503,6 @@ module.exports = {
   Double  : Double,
   
   decode  : decode,
+  fromObj : fromObj,
   types   : types
 }
