@@ -1,6 +1,6 @@
 {
   "name": "@hlhv/hnbs",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Holanet network binary structure",
   "main": "index.js",
   "scripts": {
