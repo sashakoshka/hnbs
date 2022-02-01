@@ -264,7 +264,7 @@ A wrapper that constructs and returns an `LongInt` of the proper type. The
 
 An object that stores a double value.
 
-#### decode(data)
+#### `decode(data)`
 
 - `data` `<Buffer>` The buffer to read from
 - Returns: [ `<Int>` | `<List>` | ... etc, `<Buffer>` ]
@@ -273,16 +273,16 @@ An object that stores a double value.
 input buffer with the portion it read sliced off. A good way to call this
 function is something like: `[object, data] = decode(data)`.
 
-##### fromObj(obj)
+##### `fromObj(obj)`
 
 - `obj` `<string>` | `<number>` | ... etc The value to convert to an hnbs
   object.
-- Returns: `<Str>` | `<Double>` ... etc
+- Returns: `<Str>` | `<Double>` | ... etc
 
 `fromObj` takes in any value except for a function, and converts it into an hnbs
 object.
 
-#### type
+#### `type`
 
 `type` is an "enum" that should be used to refer to type codes. It has these
 attributes:
